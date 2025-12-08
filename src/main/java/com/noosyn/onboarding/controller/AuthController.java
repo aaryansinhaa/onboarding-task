@@ -10,6 +10,7 @@ import com.noosyn.onboarding.dto.auth_dto.AuthResponse;
 import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
 import com.noosyn.onboarding.service.AuthService;
+import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +24,7 @@ import lombok.RequiredArgsConstructor;
  * </p>
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(ApiEndPointConstants.AUTH_BASE)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -37,7 +38,7 @@ public class AuthController {
      * @return a {@link ResponseEntity} containing an {@link AuthResponse} with
      *         authentication information for the newly created user
      */
-    @PostMapping("/register")
+    @PostMapping(ApiEndPointConstants.REGISTER)
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest req) {
         return ResponseEntity.ok(service.register(req));
     }
@@ -50,7 +51,7 @@ public class AuthController {
      * @return a {@link ResponseEntity} containing an {@link AuthResponse} with
      *         authentication details if login is successful
      */
-    @PostMapping("/login")
+    @PostMapping(ApiEndPointConstants.LOGIN)
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
         return ResponseEntity.ok(service.login(req));
     }

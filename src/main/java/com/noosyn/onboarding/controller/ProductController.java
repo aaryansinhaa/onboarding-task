@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.service.ProductService;
+import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,7 @@ import lombok.RequiredArgsConstructor;
  * </p>
  */
 @RestController
-@RequestMapping("/products")
+@RequestMapping(ApiEndPointConstants.PRODUCT_BASE)
 @RequiredArgsConstructor
 public class ProductController {
 
