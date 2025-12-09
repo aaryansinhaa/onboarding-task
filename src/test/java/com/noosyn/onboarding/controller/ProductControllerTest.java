@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
 
@@ -74,18 +75,22 @@ class ProductControllerTest {
     // ---------- GET ALL ----------
     @Test
     void testGetAllProducts() throws Exception {
-        List<ProductResponse> products = List.of(
+        Page<ProductResponse> products = mock(Page.class);
+        when(products.getContent()).thenReturn(List.of(
                 new ProductResponse(1L, "Laptop", new BigDecimal("50000.0")),
                 new ProductResponse(2L, "Phone", new BigDecimal("20000.0"))
-        );
+        ));
+        when(products.getNumber()).thenReturn(0);
+        when(products.getTotalElements()).thenReturn(2L);
+        when(products.getTotalPages()).thenReturn(1); 
 
-        when(productService.getAll()).thenReturn(products);
+        when(productService.getAllProducts(0, 10)).thenReturn((Page) products);
 
         mockMvc.perform(get(ApiEndPointConstants.PRODUCT_BASE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2));
+                .andExpect(jsonPath("$.items.size()").value(2));
 
-        verify(productService).getAll();
+        verify(productService).getAllProducts(0, 10);
     }
 
     // ---------- GET ONE ----------

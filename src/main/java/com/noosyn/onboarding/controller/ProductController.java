@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
+import com.noosyn.onboarding.entity.Product;
 import com.noosyn.onboarding.service.ProductService;
 import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
@@ -51,8 +54,23 @@ public class ProductController {
      * @return a {@link ResponseEntity} containing a list of products
      */
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<PaginatedResponse<ProductResponse>> getProducts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+    org.springframework.data.domain.Page<Product> productPage = service.getAllProducts(page, size);
+    List<ProductResponse> items = productPage.getContent().stream()
+            .map(p -> new ProductResponse(p.getId(), p.getName(), p.getPrice()))
+            .toList();
+
+     PaginatedResponse<ProductResponse> response = new PaginatedResponse<>(
+            items,
+            productPage.getNumber(),
+            productPage.getTotalElements(),
+            productPage.getTotalPages()
+    );
+
+    return ResponseEntity.ok(response);
     }
 
     /**

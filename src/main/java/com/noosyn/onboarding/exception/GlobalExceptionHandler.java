@@ -2,8 +2,10 @@ package com.noosyn.onboarding.exception;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,27 +22,31 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Handles all uncaught {@link RuntimeException} instances.
-     * <p>
-     * Returns a standardized error payload containing:
-     * </p>
-     * <ul>
-     *     <li>{@code message} — the exception message</li>
-     *     <li>{@code code} — a custom application error code</li>
-     *     <li>{@code timestamp} — the moment the error was processed</li>
-     * </ul>
-     *
-     * @param ex the thrown runtime exception
-     * @return a {@link ResponseEntity} containing a structured error response
-     *         with HTTP status {@link HttpStatus#BAD_REQUEST}
-     */
+    private final MessageSource messageSource;
+
+    public GlobalExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex, Locale locale) {
 
         Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        body.put("code", "ERR-001");
+        String key = ex.getMessage();
+        String message = messageSource.getMessage(
+                key,
+                null,
+                key, 
+                locale
+        );
+        String code = messageSource.getMessage(
+                "error.code." + key.substring(key.indexOf('.') + 1),
+                null,
+                "unknown error code",
+                locale
+        );
+        body.put("message", message);
+        body.put("code", code);
         body.put("timestamp", Instant.now().toString());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);

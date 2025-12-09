@@ -50,7 +50,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest req) {
 
         if (repo.findByUsername(req.username()).isPresent()) {
-            throw new BadCredentialsException("Username already taken");
+            throw new BadCredentialsException("error.username.taken");
         }
 
         User user = User.builder()
@@ -84,10 +84,10 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest req) {
         User user = repo.findByUsername(req.username())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException("error.invalid.credentials"));
 
         if (!encoder.matches(req.password(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("error.invalid.credentials");
         }
 
         return new AuthResponse(jwt.generateToken(

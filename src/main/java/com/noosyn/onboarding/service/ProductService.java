@@ -1,7 +1,6 @@
 package com.noosyn.onboarding.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
@@ -44,11 +43,12 @@ public class ProductService {
      *
      * @return a list of {@link ProductResponse} objects
      */
-    public List<ProductResponse> getAll() {
-        return repo.findAll().stream()
-                .map(p -> new ProductResponse(p.getId(), p.getName(), p.getPrice()))
-                .toList();
-    }
+    public org.springframework.data.domain.Page<Product> getAllProducts(int page, int size) {
+    org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size);
+    return repo.findAll(pageable);
+}
+
+
 
     /**
      * Retrieves a product by its identifier.
@@ -59,7 +59,7 @@ public class ProductService {
      */
     public ProductResponse get(Long id) {
         Product p = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("error.product.not.found"));
         return new ProductResponse(p.getId(), p.getName(), p.getPrice());
     }
 
@@ -73,7 +73,7 @@ public class ProductService {
      */
     public ProductResponse update(Long id, ProductRequest req) {
         Product p = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("error.product.not.found"));
 
         p.setName(req.name());
         p.setPrice(req.price());

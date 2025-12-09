@@ -8,6 +8,7 @@ import com.noosyn.onboarding.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -60,10 +61,10 @@ class ProductServiceTest {
 
         when(repo.findAll()).thenReturn(products);
 
-        List<ProductResponse> resp = service.getAll();
+        Page<Product> resp = service.getAllProducts(0, 10);
 
-        assertEquals(2, resp.size());
-        assertEquals("Laptop", resp.get(0).name());
+        assertEquals(2, resp.getContent().size());
+        assertEquals("Laptop", resp.getContent().get(0).getName());
         verify(repo).findAll();
     }
 
