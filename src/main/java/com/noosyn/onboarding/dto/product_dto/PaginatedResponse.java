@@ -6,5 +6,5 @@ public record PaginatedResponse<T>(
         List<T> items,
         int currentPage,
         long totalItems,
-        int totalPages
-) {}
+        int totalPages) {
+}

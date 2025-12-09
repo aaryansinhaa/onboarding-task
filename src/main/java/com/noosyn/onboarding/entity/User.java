@@ -19,12 +19,14 @@ import lombok.Setter;
  * information. It is persisted in the underlying database via JPA.
  * </p>
  *
- * <p>Fields include:</p>
+ * <p>
+ * Fields include:
+ * </p>
  * <ul>
- *   <li>{@code id} – Primary key</li>
- *   <li>{@code username} – Unique username used for login</li>
- *   <li>{@code password} – Encrypted password</li>
- *   <li>{@code role} – User role (e.g., {@code "USER"}, {@code "ADMIN"})</li>
+ * <li>{@code id} – Primary key</li>
+ * <li>{@code username} – Unique username used for login</li>
+ * <li>{@code password} – Encrypted password</li>
+ * <li>{@code role} – User role (e.g., {@code "USER"}, {@code "ADMIN"})</li>
  * </ul>
  *
  * Lombok annotations generate boilerplate code such as getters, setters,

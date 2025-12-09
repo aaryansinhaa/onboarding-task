@@ -1,11 +1,16 @@
 package com.noosyn.onboarding.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.entity.Product;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -41,14 +46,30 @@ public class ProductService {
     /**
      * Retrieves all products from the system.
      *
-     * @return a list of {@link ProductResponse} objects
+     * @param page the page number (0-based)
+     * @param size the page size
+     * @return a page of {@link Product} entities
      */
-    public org.springframework.data.domain.Page<Product> getAllProducts(int page, int size) {
-    org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size);
-    return repo.findAll(pageable);
-}
+    public PaginatedResponse<ProductResponse> getAllProducts(int page, int size) {
 
+        PageRequest pageable = PageRequest.of(page, size);
 
+        Page<Product> productPage = repo.findAll(pageable);
+
+        List<ProductResponse> items = productPage.getContent()
+                .stream()
+                .map(p -> new ProductResponse(
+                        p.getId(),
+                        p.getName(),
+                        p.getPrice()))
+                .toList();
+
+        return new PaginatedResponse<>(
+                items,
+                productPage.getNumber(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages());
+    }
 
     /**
      * Retrieves a product by its identifier.
@@ -59,7 +80,7 @@ public class ProductService {
      */
     public ProductResponse get(Long id) {
         Product p = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("error.product.not.found"));
+                .orElseThrow(() -> new AppException("ERR-201"));
         return new ProductResponse(p.getId(), p.getName(), p.getPrice());
     }
 
@@ -73,7 +94,7 @@ public class ProductService {
      */
     public ProductResponse update(Long id, ProductRequest req) {
         Product p = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("error.product.not.found"));
+                .orElseThrow(() -> new AppException("ERR-201"));
 
         p.setName(req.name());
         p.setPrice(req.price());

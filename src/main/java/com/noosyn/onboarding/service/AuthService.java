@@ -9,6 +9,7 @@ import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
 import com.noosyn.onboarding.entity.Role;
 import com.noosyn.onboarding.entity.User;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.UserRepository;
 import com.noosyn.onboarding.utils.JwtUtils;
 
@@ -37,11 +38,11 @@ public class AuthService {
      * The method performs the following steps:
      * </p>
      * <ul>
-     *     <li>Ensures the username is not already taken</li>
-     *     <li>Hashes the provided password</li>
-     *     <li>Creates a new {@link User} with the role {@code USER}</li>
-     *     <li>Saves the user to the database</li>
-     *     <li>Generates a JWT token for the newly registered account</li>
+     * <li>Ensures the username is not already taken</li>
+     * <li>Hashes the provided password</li>
+     * <li>Creates a new {@link User} with the role {@code USER}</li>
+     * <li>Saves the user to the database</li>
+     * <li>Generates a JWT token for the newly registered account</li>
      * </ul>
      *
      * @param req the registration details including username and password
@@ -51,7 +52,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest req) {
 
         if (repo.findByUsername(req.username()).isPresent()) {
-            throw new BadCredentialsException("error.username.taken");
+            throw new AppException("ERR-101");
         }
 
         User user = User.builder()
@@ -67,8 +68,7 @@ public class AuthService {
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
                         .roles(user.getRole().name())
-                        .build()
-        ));
+                        .build()));
     }
 
     /**
@@ -85,10 +85,10 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest req) {
         User user = repo.findByUsername(req.username())
-                .orElseThrow(() -> new BadCredentialsException("error.invalid.credentials"));
+                .orElseThrow(() -> new AppException("ERR-102"));
 
         if (!encoder.matches(req.password(), user.getPassword())) {
-            throw new BadCredentialsException("error.invalid.credentials");
+            throw new AppException("ERR-102");
         }
 
         return new AuthResponse(jwt.generateToken(
@@ -96,7 +96,6 @@ public class AuthService {
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
                         .roles(user.getRole().name())
-                        .build()
-        ));
+                        .build()));
     }
 }

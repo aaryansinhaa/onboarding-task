@@ -1,6 +1,7 @@
 package com.noosyn.onboarding.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.service.ProductService;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.Page;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.method.P;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,22 +29,15 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(
-    controllers = ProductController.class,
-    excludeFilters = {
-        @ComponentScan.Filter(
-            type = FilterType.ASSIGNABLE_TYPE,
-            classes = {
+@WebMvcTest(controllers = ProductController.class, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 JwtUtils.class,
                 JwtAuthenticationFilter.class,
                 SecurityConfig.class
-            }
-        )
-    }
-)
+        })
+})
 @AutoConfigureMockMvc(addFilters = false)
 class ProductControllerTest {
-
 
     @Autowired
     private MockMvc mockMvc;
@@ -75,20 +70,23 @@ class ProductControllerTest {
     // ---------- GET ALL ----------
     @Test
     void testGetAllProducts() throws Exception {
-        Page<ProductResponse> products = mock(Page.class);
-        when(products.getContent()).thenReturn(List.of(
-                new ProductResponse(1L, "Laptop", new BigDecimal("50000.0")),
-                new ProductResponse(2L, "Phone", new BigDecimal("20000.0"))
-        ));
-        when(products.getNumber()).thenReturn(0);
-        when(products.getTotalElements()).thenReturn(2L);
-        when(products.getTotalPages()).thenReturn(1); 
 
-        when(productService.getAllProducts(0, 10)).thenReturn((Page) products);
+        PaginatedResponse<ProductResponse> response = new PaginatedResponse<>(
+                List.of(
+                        new ProductResponse(1L, "Laptop", new BigDecimal("50000.0")),
+                        new ProductResponse(2L, "Phone", new BigDecimal("20000.0"))),
+                0,
+                2L,
+                1);
+
+        when(productService.getAllProducts(0, 10)).thenReturn(response);
 
         mockMvc.perform(get(ApiEndPointConstants.PRODUCT_BASE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.size()").value(2));
+                .andExpect(jsonPath("$.items.size()").value(2))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
 
         verify(productService).getAllProducts(0, 10);
     }

@@ -1,5 +1,6 @@
 package com.noosyn.onboarding.service;
 
+import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.entity.Product;
@@ -8,7 +9,6 @@ import com.noosyn.onboarding.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -56,15 +56,15 @@ class ProductServiceTest {
     void testGetAllProducts() {
         List<Product> products = List.of(
                 Product.builder().id(1L).name("Laptop").price(BigDecimal.valueOf(50000)).build(),
-                Product.builder().id(2L).name("Phone").price(BigDecimal.valueOf(20000)).build()
-        );
+                Product.builder().id(2L).name("Phone").price(BigDecimal.valueOf(20000)).build());
 
         when(repo.findAll()).thenReturn(products);
 
-        Page<Product> resp = service.getAllProducts(0, 10);
+        PaginatedResponse<ProductResponse> resp = service.getAllProducts(0, 10);
 
-        assertEquals(2, resp.getContent().size());
-        assertEquals("Laptop", resp.getContent().get(0).getName());
+        assertEquals(2, resp.items().size());
+        assertEquals("Laptop", resp.items().get(0).name());
+        assertEquals("Phone", resp.items().get(1).name());
         verify(repo).findAll();
     }
 

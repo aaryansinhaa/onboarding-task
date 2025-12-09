@@ -9,7 +9,6 @@ public class ApiEndPointConstants {
         // Private constructor to prevent instantiation
     }
 
-
     public static final String PRODUCT_BASE = "/products";
-    
+
 }

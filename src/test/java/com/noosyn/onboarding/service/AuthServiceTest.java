@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.noosyn.onboarding.dto.auth_dto.AuthResponse;
 import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
+import com.noosyn.onboarding.entity.Role;
 import com.noosyn.onboarding.entity.User;
 import com.noosyn.onboarding.repository.UserRepository;
 import com.noosyn.onboarding.utils.JwtUtils;
@@ -47,7 +48,7 @@ class AuthServiceTest {
         User user = User.builder()
                 .username("aaryan")
                 .password("encodedPass")
-                .role("USER")
+                .role(Role.USER)
                 .build();
 
         when(repo.findByUsername("aaryan")).thenReturn(Optional.empty());
@@ -78,7 +79,7 @@ class AuthServiceTest {
         User user = User.builder()
                 .username("aaryan")
                 .password("encodedPass")
-                .role("USER")
+                .role(Role.USER)
                 .build();
 
         when(repo.findByUsername("aaryan")).thenReturn(Optional.of(user));
@@ -105,7 +106,7 @@ class AuthServiceTest {
         User user = User.builder()
                 .username("aaryan")
                 .password("encodedPass")
-                .role("USER")
+                .role(Role.USER)
                 .build();
 
         when(repo.findByUsername("aaryan")).thenReturn(Optional.of(user));

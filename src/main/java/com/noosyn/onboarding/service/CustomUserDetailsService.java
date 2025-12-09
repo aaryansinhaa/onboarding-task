@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.noosyn.onboarding.entity.User;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,11 @@ public class CustomUserDetailsService implements UserDetailsService {
      * The method:
      * </p>
      * <ul>
-     *     <li>Searches the database for a matching user</li>
-     *     <li>Throws {@link UsernameNotFoundException} if no match is found</li>
-     *     <li>Builds a Spring Security {@link org.springframework.security.core.userdetails.User}
-     *         instance with username, password, and roles</li>
+     * <li>Searches the database for a matching user</li>
+     * <li>Throws {@link UsernameNotFoundException} if no match is found</li>
+     * <li>Builds a Spring Security
+     * {@link org.springframework.security.core.userdetails.User}
+     * instance with username, password, and roles</li>
      * </ul>
      *
      * @param username the username to look up
@@ -44,7 +46,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = repo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("error.user.not.found"));
+                .orElseThrow(() -> new AppException("ERR-103"));
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())

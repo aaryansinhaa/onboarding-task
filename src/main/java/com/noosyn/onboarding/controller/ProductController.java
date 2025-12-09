@@ -1,7 +1,5 @@
 package com.noosyn.onboarding.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
-import com.noosyn.onboarding.entity.Product;
 import com.noosyn.onboarding.service.ProductService;
 import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
@@ -55,22 +52,9 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<PaginatedResponse<ProductResponse>> getProducts(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-    ) {
-    org.springframework.data.domain.Page<Product> productPage = service.getAllProducts(page, size);
-    List<ProductResponse> items = productPage.getContent().stream()
-            .map(p -> new ProductResponse(p.getId(), p.getName(), p.getPrice()))
-            .toList();
-
-     PaginatedResponse<ProductResponse> response = new PaginatedResponse<>(
-            items,
-            productPage.getNumber(),
-            productPage.getTotalElements(),
-            productPage.getTotalPages()
-    );
-
-    return ResponseEntity.ok(response);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAllProducts(page, size));
     }
 
     /**
@@ -93,7 +77,7 @@ public class ProductController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id,
-                                                  @RequestBody ProductRequest req) {
+            @RequestBody ProductRequest req) {
         return ResponseEntity.ok(service.update(id, req));
     }
 

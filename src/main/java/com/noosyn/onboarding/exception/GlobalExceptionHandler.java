@@ -1,6 +1,7 @@
 package com.noosyn.onboarding.exception;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -11,43 +12,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.noosyn.onboarding.dto.error_dto.ApiErrorResponse;
+
+import lombok.RequiredArgsConstructor;
+
 /**
- * Global exception handler for centralized error processing across the application.
+ * Global exception handler for centralized error processing across the
+ * application.
  * <p>
- * This class intercepts exceptions thrown by controllers and provides a consistent
+ * This class intercepts exceptions thrown by controllers and provides a
+ * consistent
  * error response structure. Using {@link ControllerAdvice} allows it to apply
  * globally to all controller components.
  * </p>
  */
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiErrorResponse> handleAppException(AppException ex) {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex, Locale locale) {
+        String errorCode = ex.getErrorCode();
+        String errorMessage = messageSource.getMessage(errorCode, null, Locale.getDefault());
 
-        Map<String, Object> body = new HashMap<>();
-        String key = ex.getMessage();
-        String message = messageSource.getMessage(
-                key,
-                null,
-                key, 
-                locale
-        );
-        String code = messageSource.getMessage(
-                "error.code." + key.substring(key.indexOf('.') + 1),
-                null,
-                "unknown error code",
-                locale
-        );
-        body.put("message", message);
-        body.put("code", code);
-        body.put("timestamp", Instant.now().toString());
+        ApiErrorResponse body = new ApiErrorResponse(ex.getErrorCode(), errorMessage, LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
