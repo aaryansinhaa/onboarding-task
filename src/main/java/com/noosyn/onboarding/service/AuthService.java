@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.noosyn.onboarding.dto.auth_dto.AuthResponse;
 import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
+import com.noosyn.onboarding.entity.Role;
 import com.noosyn.onboarding.entity.User;
 import com.noosyn.onboarding.repository.UserRepository;
 import com.noosyn.onboarding.utils.JwtUtils;
@@ -56,7 +57,7 @@ public class AuthService {
         User user = User.builder()
                 .username(req.username())
                 .password(encoder.encode(req.password()))
-                .role("USER")
+                .role(Role.USER)
                 .build();
 
         repo.save(user);
@@ -65,7 +66,7 @@ public class AuthService {
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
-                        .roles(user.getRole())
+                        .roles(user.getRole().name())
                         .build()
         ));
     }
@@ -94,7 +95,7 @@ public class AuthService {
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
-                        .roles(user.getRole())
+                        .roles(user.getRole().name())
                         .build()
         ));
     }

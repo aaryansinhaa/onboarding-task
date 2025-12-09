@@ -2,6 +2,7 @@ package com.noosyn.onboarding.utils;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,14 +19,14 @@ import lombok.RequiredArgsConstructor;
  * This configuration sets up:
  * </p>
  * <ul>
- *     <li>Stateless authentication using JWT</li>
- *     <li>Custom JWT authentication filter integration</li>
- *     <li>Public and secured endpoint rules</li>
- *     <li>Password encoding strategy</li>
+ * <li>Stateless authentication using JWT</li>
+ * <li>Custom JWT authentication filter integration</li>
+ * <li>Public and secured endpoint rules</li>
+ * <li>Password encoding strategy</li>
  * </ul>
  *
  * <p>
- * All authentication is handled via JWT tokens, and server-side sessions 
+ * All authentication is handled via JWT tokens, and server-side sessions
  * are disabled to maintain stateless behavior.
  * </p>
  */
@@ -42,14 +43,16 @@ public class SecurityConfig {
      * The configuration includes:
      * </p>
      * <ul>
-     *     <li>Disabling CSRF (since JWT is used instead of cookies)</li>
-     *     <li>Stateless session management</li>
-     *     <li>Permitting public access to authentication endpoints</li>
-     *     <li>Requiring authentication for all other requests</li>
-     *     <li>Registering the custom JWT filter before the username/password filter</li>
+     * <li>Disabling CSRF (since JWT is used instead of cookies)</li>
+     * <li>Stateless session management</li>
+     * <li>Permitting public access to authentication endpoints</li>
+     * <li>Requiring authentication for all other requests</li>
+     * <li>Registering the custom JWT filter before the username/password
+     * filter</li>
      * </ul>
      *
-     * @param http the {@link HttpSecurity} instance used to configure security behavior
+     * @param http the {@link HttpSecurity} instance used to configure security
+     *             behavior
      * @return the constructed {@link SecurityFilterChain}
      * @throws Exception if configuration fails
      */
@@ -57,13 +60,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // ADMIN can do everything
+                        .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+
+                        // CUSTOMER and ADMIN both can view products
+                        .requestMatchers(HttpMethod.GET, "/products/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

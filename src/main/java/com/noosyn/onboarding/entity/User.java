@@ -1,6 +1,8 @@
 package com.noosyn.onboarding.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -62,5 +64,6 @@ public class User {
      * Role assigned to the user, determining authorization level.
      * Expected values include {@code "USER"} or {@code "ADMIN"}.
      */
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
