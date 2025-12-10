@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -36,6 +37,20 @@ public class GlobalExceptionHandler {
         String errorMessage = messageSource.getMessage(errorCode, null, Locale.getDefault());
 
         ApiErrorResponse body = new ApiErrorResponse(ex.getErrorCode(), errorMessage, LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+
+        // Extract error code set in the DTO annotation
+        String errorCode = ex.getFieldError().getDefaultMessage();
+
+        // Get error message from message.properties
+        String errorMessage = messageSource.getMessage(errorCode, null, Locale.getDefault());
+
+        ApiErrorResponse body = new ApiErrorResponse(errorCode, errorMessage, LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }

@@ -17,6 +17,7 @@ import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.service.ProductService;
 import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -41,7 +42,7 @@ public class ProductController {
      * @return a {@link ResponseEntity} with the created product details
      */
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@RequestBody ProductRequest req) {
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest req) {
         return ResponseEntity.ok(service.create(req));
     }
 
