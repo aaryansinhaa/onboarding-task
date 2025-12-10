@@ -2,6 +2,7 @@ package com.noosyn.onboarding.service;
 
 import com.noosyn.onboarding.entity.Role;
 import com.noosyn.onboarding.entity.User;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class CustomUserDetailsServiceTest {
 
         // ---------------- SUCCESS CASE ----------------
         @Test
-        void testLoadUserByUsername_Success() {
+        void ShouldLoadUserByUsernameSuccess() {
                 User mockUser = User.builder()
                                 .username("aaryan")
                                 .password("encoded-pass")
@@ -53,12 +54,12 @@ class CustomUserDetailsServiceTest {
 
         // ---------------- NOT FOUND CASE ----------------
         @Test
-        void testLoadUserByUsername_NotFound() {
+        void ShouldLoadUserByUsernameNotFound() {
                 when(repo.findByUsername("unknown"))
                                 .thenReturn(Optional.empty());
 
                 assertThrows(
-                                UsernameNotFoundException.class,
+                                AppException.class,
                                 () -> service.loadUserByUsername("unknown"));
 
                 verify(repo).findByUsername("unknown");

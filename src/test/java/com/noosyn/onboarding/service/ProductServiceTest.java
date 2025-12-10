@@ -4,17 +4,22 @@ import com.noosyn.onboarding.dto.product_dto.PaginatedResponse;
 import com.noosyn.onboarding.dto.product_dto.ProductRequest;
 import com.noosyn.onboarding.dto.product_dto.ProductResponse;
 import com.noosyn.onboarding.entity.Product;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.ProductRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class ProductServiceTest {
@@ -32,7 +37,7 @@ class ProductServiceTest {
 
     // ---------- CREATE ----------
     @Test
-    void testCreateProduct() {
+    void ShouldCreateProduct() {
         ProductRequest req = new ProductRequest("Laptop", BigDecimal.valueOf(50000));
 
         Product saved = Product.builder()
@@ -53,24 +58,27 @@ class ProductServiceTest {
 
     // ---------- GET ALL ----------
     @Test
-    void testGetAllProducts() {
+    void ShouldGetAllProducts() {
         List<Product> products = List.of(
                 Product.builder().id(1L).name("Laptop").price(BigDecimal.valueOf(50000)).build(),
                 Product.builder().id(2L).name("Phone").price(BigDecimal.valueOf(20000)).build());
 
-        when(repo.findAll()).thenReturn(products);
+        Page<Product> page = new PageImpl<>(products);
+
+        when(repo.findAll(any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
 
         PaginatedResponse<ProductResponse> resp = service.getAllProducts(0, 10);
 
         assertEquals(2, resp.items().size());
         assertEquals("Laptop", resp.items().get(0).name());
         assertEquals("Phone", resp.items().get(1).name());
-        verify(repo).findAll();
+
+        verify(repo).findAll(any(org.springframework.data.domain.Pageable.class));
     }
 
     // ---------- GET ONE ----------
     @Test
-    void testGetProduct() {
+    void ShouldGetProduct() {
         Product p = Product.builder()
                 .id(1L)
                 .name("Laptop")
@@ -87,15 +95,15 @@ class ProductServiceTest {
     }
 
     @Test
-    void testGetProduct_NotFound() {
+    void ShouldGetProductNotFound() {
         when(repo.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> service.get(1L));
+        assertThrows(AppException.class, () -> service.get(1L));
     }
 
     // ---------- UPDATE ----------
     @Test
-    void testUpdateProduct() {
+    void ShouldUpdateProduct() {
         Product existing = Product.builder()
                 .id(1L)
                 .name("Laptop")
@@ -114,17 +122,17 @@ class ProductServiceTest {
     }
 
     @Test
-    void testUpdateProduct_NotFound() {
+    void ShouldUpdateProductNotFound() {
         when(repo.findById(1L)).thenReturn(Optional.empty());
 
         ProductRequest req = new ProductRequest("Laptop", BigDecimal.valueOf(50000));
 
-        assertThrows(RuntimeException.class, () -> service.update(1L, req));
+        assertThrows(AppException.class, () -> service.update(1L, req));
     }
 
     // ---------- DELETE ----------
     @Test
-    void testDeleteProduct() {
+    void ShouldDeleteProduct() {
         doNothing().when(repo).deleteById(1L);
 
         service.delete(1L);

@@ -18,6 +18,7 @@ import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
 import com.noosyn.onboarding.entity.Role;
 import com.noosyn.onboarding.entity.User;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.repository.UserRepository;
 import com.noosyn.onboarding.utils.JwtUtils;
 
@@ -43,7 +44,7 @@ class AuthServiceTest {
     // ---------------- REGISTER TESTS ------------------
 
     @Test
-    void testRegisterSuccess() {
+    void ShouldRegisterUser() {
         RegisterRequest req = new RegisterRequest("aaryan", "pass123");
         User user = User.builder()
                 .username("aaryan")
@@ -63,18 +64,18 @@ class AuthServiceTest {
     }
 
     @Test
-    void testRegisterUserAlreadyExists() {
+    void ShouldFailRegisterWhenUserAlreadyExists() {
         RegisterRequest req = new RegisterRequest("aaryan", "pass123");
 
         when(repo.findByUsername("aaryan")).thenReturn(Optional.of(new User()));
 
-        assertThrows(BadCredentialsException.class, () -> authService.register(req));
+        assertThrows(AppException.class, () -> authService.register(req));
     }
 
     // ---------------- LOGIN TESTS ------------------
 
     @Test
-    void testLoginSuccess() {
+    void ShouldLoginWhenCorrectCredentials() {
         LoginRequest req = new LoginRequest("aaryan", "pass123");
         User user = User.builder()
                 .username("aaryan")
@@ -92,16 +93,16 @@ class AuthServiceTest {
     }
 
     @Test
-    void testLoginInvalidUsername() {
+    void ShouldFailLoginWhenInvalidUsername() {
         LoginRequest req = new LoginRequest("wrong", "pass123");
 
         when(repo.findByUsername("wrong")).thenReturn(Optional.empty());
 
-        assertThrows(BadCredentialsException.class, () -> authService.login(req));
+        assertThrows(AppException.class, () -> authService.login(req));
     }
 
     @Test
-    void testLoginInvalidPassword() {
+    void ShouldFailLoginWhenInvalidPassword() {
         LoginRequest req = new LoginRequest("aaryan", "wrongPass");
         User user = User.builder()
                 .username("aaryan")
@@ -112,6 +113,13 @@ class AuthServiceTest {
         when(repo.findByUsername("aaryan")).thenReturn(Optional.of(user));
         when(encoder.matches("wrongPass", "encodedPass")).thenReturn(false);
 
-        assertThrows(BadCredentialsException.class, () -> authService.login(req));
+        assertThrows(AppException.class, () -> authService.login(req));
+    }
+
+    @Test
+    void ShouldFailLoginWhenUserNotFound() {
+        LoginRequest req = new LoginRequest("nonexistent", "pass123");
+        when(repo.findByUsername("nonexistent")).thenReturn(Optional.empty());
+        assertThrows(AppException.class, () -> authService.login(req));
     }
 }

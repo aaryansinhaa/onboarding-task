@@ -12,6 +12,7 @@ import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
 import com.noosyn.onboarding.service.AuthService;
 import com.noosyn.onboarding.utils.ApiEndPointConstants;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -39,7 +40,7 @@ public class AuthController {
      *         authentication information for the newly created user
      */
     @PostMapping(ApiEndPointConstants.REGISTER)
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
         return ResponseEntity.ok(service.register(req));
     }
 
@@ -52,7 +53,7 @@ public class AuthController {
      *         authentication details if login is successful
      */
     @PostMapping(ApiEndPointConstants.LOGIN)
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<AuthResponse> login( @Valid @RequestBody LoginRequest req) {
         return ResponseEntity.ok(service.login(req));
     }
 }

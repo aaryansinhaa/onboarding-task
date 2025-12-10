@@ -18,25 +18,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noosyn.onboarding.dto.auth_dto.AuthResponse;
 import com.noosyn.onboarding.dto.auth_dto.LoginRequest;
 import com.noosyn.onboarding.dto.auth_dto.RegisterRequest;
+import com.noosyn.onboarding.exception.AppException;
 import com.noosyn.onboarding.service.AuthService;
 import com.noosyn.onboarding.utils.ApiEndPointConstants;
 import com.noosyn.onboarding.utils.JwtAuthenticationFilter;
 import com.noosyn.onboarding.utils.JwtUtils;
 import com.noosyn.onboarding.utils.SecurityConfig;
 
-@WebMvcTest(
-    controllers = AuthController.class,
-    excludeFilters = {
-        @ComponentScan.Filter(
-            type = FilterType.ASSIGNABLE_TYPE,
-            classes = {
+@WebMvcTest(controllers = AuthController.class, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 JwtUtils.class,
                 JwtAuthenticationFilter.class,
                 SecurityConfig.class
-            }
-        )
-    }
-)
+        })
+})
 @AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
@@ -49,8 +44,11 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+
+// ---------- REGISTER ----------
+
     @Test
-    void testRegister() throws Exception {
+    void ShouldRegisterWhenCorrectInput() throws Exception {
         RegisterRequest req = new RegisterRequest("aaryan", "password123");
         AuthResponse resp = new AuthResponse("fake-jwt-token");
 
@@ -59,8 +57,7 @@ class AuthControllerTest {
         mockMvc.perform(
                 post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.REGISTER)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req))
-        )
+                        .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("fake-jwt-token"));
 
@@ -68,7 +65,37 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin() throws Exception {
+    void ShouldFailRegisterWhenUsernameExists() throws Exception {
+        RegisterRequest req = new RegisterRequest("existingUser", "password123");
+
+        when(authService.register(req)).thenThrow(new AppException("ERR-101"));
+
+        mockMvc.perform(
+                post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.REGISTER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+
+        verify(authService).register(req);
+    }
+
+    @Test
+    void ShouldFailRegisterWhenInvalidInput() throws Exception {
+        RegisterRequest req = new RegisterRequest("", ""); // Invalid input
+        mockMvc.perform(
+                post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.REGISTER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+        verify(authService, never()).register(any(RegisterRequest.class));
+    }
+
+
+
+
+// ---------- LOGIN ----------
+    @Test
+    void ShouldLoginWhenCorrectCredentials() throws Exception {
         LoginRequest req = new LoginRequest("aaryan", "password123");
         AuthResponse resp = new AuthResponse("fake-login-jwt");
 
@@ -77,11 +104,40 @@ class AuthControllerTest {
         mockMvc.perform(
                 post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.LOGIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req))
-        )
+                        .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("fake-login-jwt"));
 
         verify(authService).login(req);
     }
+    @Test
+    void ShouldFailLoginWhenInvalidCredentials() throws Exception {
+        LoginRequest req = new LoginRequest("aaryan", "wrongpassword");
+
+        when(authService.login(req)).thenThrow(new AppException("ERR-102"));
+
+        mockMvc.perform(
+                post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.LOGIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req))
+        )
+                .andExpect(status().isBadRequest());
+
+        verify(authService).login(req);
+    }
+    @Test
+    void ShouldFailLoginWhenInvalidInput() throws Exception {
+        LoginRequest req = new LoginRequest("", ""); // Invalid input 
+        mockMvc.perform(
+                post(ApiEndPointConstants.AUTH_BASE + ApiEndPointConstants.LOGIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+        verify(authService, never()).login(any(LoginRequest.class));
+
+    }
+
+
 }
+
+
