@@ -61,7 +61,9 @@ public class AuthService {
                 .role(Role.USER)
                 .build();
 
-        repo.save(user);
+        if (user != null) {
+            repo.save(user);
+        }
 
         return new AuthResponse(jwt.generateToken(
                 org.springframework.security.core.userdetails.User
