@@ -153,6 +153,18 @@ class ProductControllerTest {
                 verify(productService).update(99L, req);
         }
 
+        @Test
+        void ShouldFailUpdateProductWhenProductRequestInvalid() throws Exception {
+                ProductRequest req = new ProductRequest("", new BigDecimal("-500.0"));
+
+                mockMvc.perform(put(ApiEndPointConstants.PRODUCT_BASE + "/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(req)))
+                                .andExpect(status().isBadRequest());
+
+                verify(productService, never()).update(anyLong(), any(ProductRequest.class));
+        }
+
         // ---------- DELETE ----------
         @Test
         void ShouldDeleteProduct() throws Exception {
