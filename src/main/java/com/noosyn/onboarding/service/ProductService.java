@@ -36,6 +36,11 @@ public class ProductService {
      * @return a {@link ProductResponse} representing the newly created product
      */
     public ProductResponse create(ProductRequest req) {
+        //invalid data check
+        if (req.name() == null || req.name().isEmpty() || req.price() == null || req.price().compareTo(BigDecimal.ZERO) < 0) {
+            throw new AppException("ERR-200");
+        }
+
         Product p = repo.save(Product.builder()
                 .name(req.name())
                 .price(req.price())
